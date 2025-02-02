@@ -1,68 +1,26 @@
 workflows:
   android-build:
-    name: Build Android app
+    name: Build Android App
     max_build_duration: 60
+    environment:
+      vars:
+        BUILDOZER_WARN_ON_ROOT: "0"
+      groups:
+        - google_credentials # Προαιρετικό αν χρησιμοποιείς Google Play
     scripts:
       - name: Install dependencies
         script: |
-          # Δημιουργία και ενεργοποίηση περιβάλλοντος
-          python -m venv venv
+          python3 -m venv venv
           source venv/bin/activate
-          
-          # Εγκατάσταση των εξαρτήσεων για το Buildozer και το Kivy
-          pip install kivy
-          pip install buildozer
-          
-      - name: Run tests
+          pip install --upgrade pip
+          pip install buildozer cython virtualenv
+      - name: Build APK
         script: |
-          # Αν έχεις unit tests, μπορείς να τα τρέξεις εδώ με pytest ή άλλο εργαλείο
-          pytest
-
-      - name: Build the app for Android using Buildozer
-        script: |
-          # Εκτελούμε το buildozer για Android
+          source venv/bin/activate
           buildozer android debug
-
-      - name: Send APK via email
-        script: |
-          import smtplib
-          from email.mime.multipart import MIMEMultipart
-          from email.mime.base import MIMEBase
-          from email import encoders
-          import os
-
-          # Δημιουργία του email
-          sender_email = "panosgiannoulis76@gmail.com"  # Αντικατέστησε με το email σου
-          receiver_email = "panosgiannoulis76@gmail.com"
-          password = "Panos2016@@"  # Αντικατέστησε με τον κωδικό του email σου
-
-          # Δημιουργία του MIME
-          msg = MIMEMultipart()
-          msg['From'] = sender_email
-          msg['To'] = receiver_email
-          msg['Subject'] = "APK File from Codemagic Build"
-          
-          # Ανέβασμα του αρχείου APK
-          file_path = "bin/*.apk"  # Μπορείς να προσθέσεις τον ακριβή φάκελο εάν είναι διαφορετικός
-          part = MIMEBase('application', 'octet-stream')
-          with open(file_path, 'rb') as file:
-              part.set_payload(file.read())
-          encoders.encode_base64(part)
-          part.add_header('Content-Disposition', 'attachment; filename="app.apk"')
-
-          msg.attach(part)
-
-          # Σύνδεση με τον SMTP server και αποστολή του email
-          try:
-              server = smtplib.SMTP('smtp.gmail.com', 587)
-              server.starttls()
-              server.login(sender_email, password)
-              server.sendmail(sender_email, receiver_email, msg.as_string())
-              server.quit()
-              print("Email sent successfully")
-          except Exception as e:
-              print(f"Error: {e}")
-
     artifacts:
-      - path: "bin/*.apk"
-        type: "apk"
+      - build/*.apk
+    publishing:
+      email:
+        recipients:
+          - "panosgiannoulis76@gmail.com"
