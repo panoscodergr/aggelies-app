@@ -65,3 +65,4 @@ workflows:
 
     artifacts:
       - path: "bin/*.apk"
+        type: "apk"
