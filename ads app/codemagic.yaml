@@ -2,7 +2,7 @@ workflows:
   android-build:
     name: Android APK Build
     max_build_duration: 60
-    instance_type: mac_mini_m1  # Χρήση macOS με Apple M1 για καλύτερη απόδοση
+    instance_type: mac_mini_m1
     environment:
       vars:
         BUILDOZER_WARN_ON_ROOT: "0"
@@ -15,18 +15,21 @@ workflows:
           source venv/bin/activate
           pip install --upgrade pip setuptools
           pip install buildozer cython virtualenv
-      
+
       - name: Install system dependencies
         script: |
           brew install openjdk@17
           export JAVA_HOME=$(/usr/libexec/java_home -v 17)
           brew install zip unzip
 
-      - name: Initialize Buildozer (αν δεν υπάρχει το αρχείο)
+      - name: Initialize Buildozer
         script: |
           source venv/bin/activate
           if [ ! -f "buildozer.spec" ]; then
+            echo "Το αρχείο buildozer.spec δεν υπάρχει! Το δημιουργούμε..."
             buildozer init
+          else
+            echo "Το αρχείο buildozer.spec υπάρχει ήδη!"
           fi
 
       - name: Build APK
