@@ -2,9 +2,6 @@ workflows:
   android-build:
     name: Build Android app
     max_build_duration: 60
-    environment:
-      python: 3.10.5
-      os: ubuntu-latest
     scripts:
       - name: Install dependencies
         script: |
@@ -67,5 +64,4 @@ workflows:
               print(f"Error: {e}")
 
     artifacts:
-      - path: bin/*.apk
-        destination: build-artifacts/
+      - path: "bin/*.apk"
