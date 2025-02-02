@@ -4,9 +4,9 @@ workflows:
     max_build_duration: 60
     environment:
       vars:
-        BUILDOZER_WARN_ON_ROOT: "0"
+        BUILDOZER_SPEC_FILE: "buildozer.spec"
       groups:
-        - google_credentials # Προαιρετικό αν χρησιμοποιείς Google Play
+        - google_credentials # Προαιρετικό αν ανεβάζεις στο Google Play
     scripts:
       - name: Install dependencies
         script: |
@@ -14,12 +14,20 @@ workflows:
           source venv/bin/activate
           pip install --upgrade pip
           pip install buildozer cython virtualenv
+      
+      - name: Initialize Buildozer (αν το αρχείο λείπει)
+        script: |
+          source venv/bin/activate
+          if [ ! -f "buildozer.spec" ]; then
+            buildozer init
+          fi
+      
       - name: Build APK
         script: |
           source venv/bin/activate
           buildozer android debug
     artifacts:
-      - build/*.apk
+      - bin/*.apk
     publishing:
       email:
         recipients:
