@@ -1,33 +1,44 @@
 workflows:
   android-build:
-    name: Build Android App
+    name: Android APK Build
     max_build_duration: 60
+    instance_type: mac_mini_m1  # Χρήση macOS με Apple M1 για καλύτερη απόδοση
     environment:
       vars:
-        BUILDOZER_SPEC_FILE: "buildozer.spec"
+        BUILDOZER_WARN_ON_ROOT: "0"
+      python:
+        version: "3.11"  # Χρήση Python 3.11 για αποφυγή προβλημάτων
       groups:
-        - google_credentials # Προαιρετικό αν ανεβάζεις στο Google Play
+        - google_credentials # Προαιρετικό για ανέβασμα στο Play Store
     scripts:
       - name: Install dependencies
         script: |
           python3 -m venv venv
           source venv/bin/activate
-          pip install --upgrade pip
+          pip install --upgrade pip setuptools
           pip install buildozer cython virtualenv
       
-      - name: Initialize Buildozer (αν το αρχείο λείπει)
+      - name: Install system dependencies
+        script: |
+          brew install openjdk@17
+          export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+          brew install zip unzip
+
+      - name: Initialize Buildozer (αν δεν υπάρχει το αρχείο)
         script: |
           source venv/bin/activate
           if [ ! -f "buildozer.spec" ]; then
             buildozer init
           fi
-      
+
       - name: Build APK
         script: |
           source venv/bin/activate
           buildozer android debug
+
     artifacts:
-      - bin/*.apk
+      - "bin/*.apk"
+
     publishing:
       email:
         recipients:
