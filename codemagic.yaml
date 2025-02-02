@@ -6,13 +6,11 @@ workflows:
     environment:
       vars:
         BUILDOZER_WARN_ON_ROOT: "0"
-      python:
-        version: "3.11"  # Χρήση Python 3.11 για αποφυγή προβλημάτων
-      groups:
-        - google_credentials # Προαιρετικό για ανέβασμα στο Play Store
     scripts:
-      - name: Install dependencies
+      - name: Install Python 3.11 & dependencies
         script: |
+          pyenv install 3.11.6 --skip-existing
+          pyenv global 3.11.6
           python3 -m venv venv
           source venv/bin/activate
           pip install --upgrade pip setuptools
